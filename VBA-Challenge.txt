@@ -1,0 +1,61 @@
+Sub Stocks()
+        Dim i As Long
+        Dim lastRow As Long
+        Dim openprice As Double
+        Dim closeprice As Double
+        Dim year As Double
+        Dim ticket As String
+        Dim yearlychange As Double
+        Dim percentchange As Double
+        Dim totalstock As Double
+        Dim ws As Worksheet
+        
+For Each ws In Worksheets
+
+        ws.Range("A:A").AdvancedFilter Action:=xlFilterCopy, CopyToRange:=ws.Range("I2"), Unique:=True
+        
+        lastRow = ws.Range("A" & ws.Rows.Count).End(xlUp).Row
+        lastRowTick = ws.Range("I" & ws.Rows.Count).End(xlUp).Row
+        
+        For i = 2 To lastRow
+            If (ws.Cells(i, 2) = "20160101") Or (ws.Cells(i, 2) = "20150101") Or (ws.Cells(i, 2) = "20140101") Then
+                openprice = ws.Cells(i, 3)
+                ticker = ws.Cells(i, 1)
+            ElseIf (ws.Cells(i, 2) = "20161230") Or (ws.Cells(i, 2) = "20151230") Or (ws.Cells(i, 2) = "20141230") Then
+                closeprice = ws.Cells(i, 6)
+                ticker = ws.Cells(i, 1)
+            End If
+        
+            yearlychange = openprice - closeprice
+            percentchange = yearlychange / openprice
+            
+            Dim j As Integer
+            For j = 2 To lastRowTick
+                If ticker = ws.Cells(j, 9) Then
+                    ws.Cells(j, 10) = yearlychange
+                    If ws.Cells(j, 10) >= 0 Then ws.Cells(j, 10).Interior.Color = vbGreen
+                    If ws.Cells(j, 10) < 0 Then ws.Cells(j, 10).Interior.Color = vbRed
+                    ws.Cells(j, 11) = percentchange
+                    ws.Cells(j, 11).NumberFormat = "0.00%"
+                End If
+            Next j
+        Next i
+    
+    ws.Range("J2") = "Yearly Change"
+    ws.Range("K2") = "Percent Change"
+    ws.Range("L2") = "Total Volume"
+    
+    For i = 3 To lastRowTick
+        ticker = Cells(i, 9)
+        totalstock = 0
+        
+        For j = 2 To lastRow
+            If ws.Cells(j, 1) = ticker Then
+                totalstock = totalstock + ws.Cells(j, 7)
+            End If
+            ws.Cells(i, 12) = totalstock
+        Next j
+    Next i
+Next ws
+
+End Sub
